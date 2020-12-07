@@ -44,6 +44,7 @@ class AssetPicker<A, P> extends StatelessWidget {
     bool allowSpecialItemWhenEmpty = false,
     Curve routeCurve = Curves.easeIn,
     Duration routeDuration = const Duration(milliseconds: 300),
+    Widget bottomAction = const SizedBox.shrink(),
   }) async {
     if (maxAssets == null || maxAssets < 1) {
       throw ArgumentError(
@@ -101,6 +102,7 @@ class AssetPicker<A, P> extends StatelessWidget {
               gridCount: gridCount,
               textDelegate: textDelegate,
               themeColor: themeColor,
+              bottomAction: bottomAction,
               pickerTheme: pickerTheme,
               previewThumbSize: previewThumbSize,
               specialPickerType: specialPickerType,

@@ -67,7 +67,7 @@ class DefaultAssetsPickerTextDelegate implements AssetsPickerTextDelegate {
       DefaultAssetsPickerTextDelegate._internal();
 
   @override
-  String confirm = '确认';
+  String confirm = '上传';
 
   @override
   String cancel = '取消';
@@ -121,7 +121,7 @@ class EnglishTextDelegate implements AssetsPickerTextDelegate {
   static final EnglishTextDelegate _instance = EnglishTextDelegate._internal();
 
   @override
-  String confirm = 'Confirm';
+  String confirm = 'Upload';
 
   @override
   String cancel = 'Cancel';

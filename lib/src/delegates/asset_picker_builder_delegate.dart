@@ -28,6 +28,7 @@ abstract class AssetPickerBuilderDelegate<A, P> {
     this.specialItemPosition = SpecialItemPosition.none,
     this.specialItemBuilder,
     this.allowSpecialItemWhenEmpty = false,
+    this.bottomAction,
   })  : assert(
           pickerTheme == null || themeColor == null,
           'Theme and theme color cannot be set at the same time.',
@@ -71,7 +72,7 @@ abstract class AssetPickerBuilderDelegate<A, P> {
   /// Whether the special item will display or not when assets is empty.
   /// 当没有资源时是否显示自定义item
   final bool allowSpecialItemWhenEmpty;
-
+  final Widget bottomAction;
   /// [ThemeData] for the picker.
   /// 选择器使用的主题
   ThemeData get theme => pickerTheme ?? AssetPicker.themeData(themeColor);
@@ -242,7 +243,7 @@ abstract class AssetPickerBuilderDelegate<A, P> {
   /// 主要的资源查看网格部件
   Widget assetsGridBuilder(BuildContext context) {
     return ColoredBox(
-      color: theme.canvasColor,
+      color: Colors.white,
       child: Selector<AssetPickerProvider<A, P>, List<A>>(
         selector: (BuildContext _, AssetPickerProvider<A, P> provider) =>
             provider.currentAssets,
@@ -310,17 +311,20 @@ abstract class AssetPickerBuilderDelegate<A, P> {
   Widget bottomActionBar(BuildContext context) {
     Widget child = Container(
       width: Screens.width,
-      height: bottomActionBarHeight + Screens.bottomSafeHeight,
+      height: bottomActionBarHeight + Screens.bottomSafeHeight + 8,
       padding: EdgeInsets.only(
         left: 20.0,
         right: 20.0,
         bottom: Screens.bottomSafeHeight,
       ),
-      color: theme.primaryColor.withOpacity(isAppleOS ? 0.90 : 1.0),
-      child: Row(children: <Widget>[
-        if (!isSingleAssetMode || !isAppleOS) previewButton(context),
-        if (isAppleOS) const Spacer(),
-        if (isAppleOS) confirmButton(context),
+      color: const Color(0xFFEFEFEF),
+      child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+        bottomAction,
+        const SizedBox(width: 20,),
+        confirmButton(context)
       ]),
     );
     if (isAppleOS) {
@@ -354,7 +358,7 @@ abstract class AssetPickerBuilderDelegate<A, P> {
                 child: Center(
                   child: Text(
                     Constants.textDelegate.cancel,
-                    style: const TextStyle(fontSize: 18.0),
+                    style: const TextStyle(fontSize: 18.0, color: Color(0xFF333333),),
                   ),
                 ),
               ),
@@ -363,7 +367,7 @@ abstract class AssetPickerBuilderDelegate<A, P> {
         } else {
           return IconButton(
             onPressed: Navigator.of(context).maybePop,
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.close, color: Color(0xFF333333),),
           );
         }
       }(),
@@ -412,6 +416,7 @@ class DefaultAssetPickerBuilderDelegate
     SpecialItemPosition specialItemPosition = SpecialItemPosition.none,
     WidgetBuilder specialItemBuilder,
     bool allowSpecialItemWhenEmpty = false,
+    this.bottomAction,
     this.previewThumbSize,
     this.specialPickerType,
   })  : assert(
@@ -456,6 +461,8 @@ class DefaultAssetPickerBuilderDelegate
   /// 这里包含一些特殊选择类型：
   /// * [SpecialPickerType.wechatMoment] 微信朋友圈模式。当用户选择了视频，将不能选择图片。
   final SpecialPickerType specialPickerType;
+  /// 底部操作
+  final Widget bottomAction;
 
   /// [Duration] when triggering path switching.
   /// 切换路径时的动画时长
@@ -510,11 +517,11 @@ class DefaultAssetPickerBuilderDelegate
   @override
   FixedAppBar appBar(BuildContext context) {
     return FixedAppBar(
-      backgroundColor: theme.appBarTheme.color,
+      backgroundColor: Colors.white,
       centerTitle: isAppleOS,
       title: pathEntitySelector(context),
       leading: backButton(context),
-      actions: !isAppleOS ? <Widget>[confirmButton(context)] : null,
+      actions: <Widget>[previewButton(context)],
       actionsPadding: const EdgeInsets.only(right: 14.0),
       blurRadius: isAppleOS ? appleOSBlurRadius : 0.0,
     );
@@ -760,24 +767,21 @@ class DefaultAssetPickerBuilderDelegate
         Widget __,
       ) {
         return MaterialButton(
-          minWidth: provider.isSelectedNotEmpty ? 48.0 : 20.0,
-          height: appBarItemHeight,
+          minWidth: 80,
+          height: 44.0,
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          color: provider.isSelectedNotEmpty ? themeColor : theme.dividerColor,
+          color: provider.isSelectedNotEmpty ? const Color(0xFF1591FF) : const Color(0xFF1591FF).withOpacity(0.5),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3.0),
+            borderRadius: BorderRadius.circular(6.0),
           ),
           child: Text(
             provider.isSelectedNotEmpty && !isSingleAssetMode
                 ? '${Constants.textDelegate.confirm}'
                     '(${provider.selectedAssets.length}/${provider.maxAssets})'
                 : Constants.textDelegate.confirm,
-            style: TextStyle(
-              color: provider.isSelectedNotEmpty
-                  ? theme.textTheme.bodyText1.color
-                  : theme.textTheme.caption.color,
-              fontSize: 17.0,
-              fontWeight: FontWeight.normal,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14.0,
             ),
           ),
           onPressed: () {
@@ -786,6 +790,7 @@ class DefaultAssetPickerBuilderDelegate
             }
           },
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          elevation: 0.0,
         );
       },
     );
@@ -907,7 +912,7 @@ class DefaultAssetPickerBuilderDelegate
             child: AnimatedOpacity(
               duration: switchingPathDuration,
               opacity: isSwitchingPath ? 1.0 : 0.0,
-              child: Container(color: Colors.black.withOpacity(0.75)),
+              child: Container(color: Colors.black.withOpacity(0.45)),
             ),
           ),
         );
@@ -1005,7 +1010,7 @@ class DefaultAssetPickerBuilderDelegate
               padding: const EdgeInsets.only(left: 12.0, right: 6.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                color: theme.dividerColor,
+                color: Colors.black12,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -1016,6 +1021,7 @@ class DefaultAssetPickerBuilderDelegate
                         provider.currentPathEntity.name ?? '',
                         style: const TextStyle(
                           fontSize: 18.0,
+                          color: Color(0xFF333333),
                           fontWeight: FontWeight.normal,
                         ),
                         maxLines: 1,
@@ -1204,8 +1210,8 @@ class DefaultAssetPickerBuilderDelegate
                       : Constants.textDelegate.preview,
                   style: TextStyle(
                     color: isSelectedNotEmpty
-                        ? null
-                        : theme.textTheme.caption.color,
+                        ? const Color(0xFF333333)
+                        : Colors.grey,
                     fontSize: 18.0,
                   ),
                 );
